@@ -5,12 +5,15 @@ import sunnyIcon from '../assets/Sun Icon.png';
 import HumidityIcon from '../assets/Himidty.jpg';
 import WindIcon from '../assets/windspeed.png';
 
+const cityList = ["Phalaborwa", "Johannesburg", "Cape Town", "Durban", "Pretoria", "Polokwane", "Nelspruit", "East London", "Port Elizabeth"];
+
 const Weather = () => {
   const [city, setCity] = useState("Phalaborwa");
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [searchCity, setSearchCity] = useState("");
   const [error, setError] = useState(""); // State for error message
+  const [suggestions, setSuggestions] = useState([]); // State for search suggestions
 
   const fetchWeather = async (city) => {
     try {
@@ -76,6 +79,7 @@ const Weather = () => {
     if (searchCity.trim()) {
       setCity(searchCity);
       setSearchCity("");
+      setSuggestions([]); // Clear suggestions
     }
   };
 
@@ -85,6 +89,26 @@ const Weather = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchCity(value);
+
+    // Filter suggestions
+    if (value) {
+      const filteredSuggestions = cityList.filter((city) =>
+        city.toLowerCase().startsWith(value.toLowerCase())
+      );
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchCity(suggestion);
+    setSuggestions([]); // Clear suggestions
+  };
+
   return (
     <div className='Weather'>
       <div className='Search-bar'>
@@ -92,10 +116,19 @@ const Weather = () => {
           type="text"
           placeholder='Search'
           value={searchCity}
-          onChange={(e) => setSearchCity(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
         />
         <img src={searchIcon1} alt="Search" onClick={handleSearch} />
+        {suggestions.length > 0 && (
+          <ul className='Suggestions'>
+            {suggestions.map((suggestion, index) => (
+              <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {error && <p className='Error'>{error}</p>} {/* Display error message */}
